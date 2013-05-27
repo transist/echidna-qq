@@ -5,22 +5,10 @@ class User
   # Include default devise modules. Others available are:
   # :token_authenticatable, :confirmable,
   # :lockable, :timeoutable and :omniauthable
-  devise :database_authenticatable, :registerable,
-         :recoverable, :rememberable, :trackable, :validatable
-
-  ## Database authenticatable
-  field :email,              :type => String, :default => ""
-  field :encrypted_password, :type => String, :default => ""
-
-  validates_presence_of :email
-  validates_presence_of :encrypted_password
-  
-  ## Recoverable
-  field :reset_password_token,   :type => String
-  field :reset_password_sent_at, :type => Time
+  devise :trackable
 
   ## Rememberable
-  field :remember_created_at, :type => Time
+  # field :remember_created_at, :type => Time
 
   ## Trackable
   field :sign_in_count,      :type => Integer, :default => 0
@@ -43,8 +31,36 @@ class User
   ## Token authenticatable
   # field :authentication_token, :type => String
   # run 'rake db:mongoid:create_indexes' to create indexes
-  index({ email: 1 }, { unique: true, background: true })
-  field :name, :type => String
-  validates_presence_of :name
-  attr_accessible :name, :email, :password, :password_confirmation, :remember_me, :created_at, :updated_at
+  field :name, type: String
+
+  field :openid, type: String
+  field :nick, type: String
+  field :access_token, type: String
+  field :refresh_token, type: String
+  field :expires_at, type: Integer
+
+  attr_accessible :name, :remember_me, :created_at, :updated_at
+  attr_accessible :openid, :nick, :access_token, :refresh_token, :expires_at
+
+  def self.weibo_client
+    Tencent::Weibo::Client.new(
+      ENV['TENCENT_APP_KEY'],
+      ENV['TENCENT_APP_SECRET'],
+      ENV['TENCENT_REDIRECT_URI']
+    )
+  end
+
+  def get(path, params = {}, &block)
+    access_token.get(path, params: params, &block).parsed
+  end
+
+  def post(path, body = {}, &block)
+    access_token.post(path, body: body, &block).parsed
+  end
+
+  private
+  def access_token
+    @weibo ||= self.class.weibo_client
+    @access_token ||= Tencent::Weibo::AccessToken.from_hash(@weibo, attributes)
+  end
 end

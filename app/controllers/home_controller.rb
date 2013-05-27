@@ -1,5 +1,5 @@
 class HomeController < ApplicationController
   def index
-    @users = User.all
+    redirect_to '/friends' if user_signed_in?
   end
 end

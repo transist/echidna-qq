@@ -1,4 +1,20 @@
-%h3 Home
-- @users.each do |user|
-  %p
-    User: #{link_to user.name, user}
+.jumbotron
+  %h1 管理你的收听
+  %p.lead 智能判断你收听的是不是僵尸粉，管理你的收听名单，更有效的使用腾讯微博。
+  = link_to '开始使用', users_login_path, class: 'btn btn-large btn-success'
+%hr/
+.row-fluid.marketing
+  .span6
+    %h4 智能的判断
+    %p 实践发现，我们的判断能够达到95%的正确率。
+    %h4 自主的操作
+    %p 所有的都只是建议，需要你自己来做主进行操作。靠自己的双手清洁微博。
+    %h4 信息源很重要
+    %p 良好的信息源管理，可以让您的信息摄入能力倍增！
+  .span6
+    %h4 创建名单
+    %p 利用腾讯微博内置的名单管理来分类你的信息
+    %h4 草根收听
+    %p 大多数的金子都还埋在土里，收听那些还是草根的优质微博。我们负责推荐。
+    %h4 管理粉丝？
+    %p 先...等等。

@@ -1,14 +1,12 @@
-= link_to "Echidna Qq", root_path, :class => 'brand'
-%ul.nav
-  - if user_signed_in?
-    %li
-      = link_to 'Logout', destroy_user_session_path, :method=>'delete'
-  - else
-    %li
-      = link_to 'Login', new_user_session_path
-  - if user_signed_in?
-    %li
-      = link_to 'Edit account', edit_user_registration_path
-  - else
-    %li
-      = link_to 'Sign up', new_user_registration_path
+.masthead
+  %ul.nav.nav-pills.pull-right
+    - if user_signed_in?
+      %li
+        = link_to "登出 #{current_user.name}", users_logout_path, :method=>'delete'
+    - else
+      %li
+        .span
+          腾讯微博登录
+        .span
+          = link_to image_tag('weiboicon24.png'), users_login_path
+  %h3.muted 针鼹鼠

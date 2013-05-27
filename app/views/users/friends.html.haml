@@ -1,0 +1,22 @@
+%table.table.table-striped.table-hover
+  %thead
+    %tr
+      %td 头像
+      %td 昵称
+      %td 标签
+      %td 概率
+      %td 操作
+
+  %tbody
+    - @friends.each do |friend|
+      %tr 
+        %td 
+          = link_to image_tag(friend["head"] + '/100'), ('http://t.qq.com/' + friend['name'])
+        %td 
+          = link_to friend["nick"], ('http://t.qq.com/' + friend['name'])
+        %td(style="width: 40%;")
+          = friend["tag"].map{|tag| "<span class='label label-tag'>#{tag['name']}</span>"}.join.html_safe if friend['tag']
+        %td
+          = Random.rand(100).to_s + "%"
+        %td
+          = link_to '取消关注', del_friend_path(friend['openid']), method: :delete, class: 'btn btn-danger', confirm: '确定？'
