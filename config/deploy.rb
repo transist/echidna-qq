@@ -1,25 +1,63 @@
-set :application, "set your application name here"
-set :repository,  "set your repository location here"
+require 'capistrano_colors'
 
-# set :scm, :git # You can set :scm explicitly or Capistrano will make an intelligent guess based on known version control directory names
-# Or: `accurev`, `bzr`, `cvs`, `darcs`, `git`, `mercurial`, `perforce`, `subversion` or `none`
+set :application, 'echidna-qq'
+set :repository, 'git@github.com:transist/echidna-qq.git'
+set :scm, :git
+set :deploy_via, :remote_cache
+set :use_sudo, false
+set :user, 'echidna'
 
-role :web, "your web-server here"                          # Your HTTP server, Apache/etc
-role :app, "your app-server here"                          # This may be the same as your `Web` server
-role :db,  "your primary db-server here", :primary => true # This is where Rails migrations will run
-role :db,  "your slave db-server here"
+set :rvm_ruby_string, '2.0.0-p0'
+require 'rvm/capistrano'
 
-# if you want to clean up old releases on each deploy uncomment this:
-# after "deploy:restart", "deploy:cleanup"
+set :bundle_flags, '--deployment --quiet --binstubs'
+set :bundle_without, [:development, :test]
+require 'bundler/capistrano'
+# Use HTTP proxy from Transist server to help bundler cross the GFW
+set :default_environment, {
+  http_proxy: 'http://192.168.1.42:8123'
+}
 
-# if you're still using the script/reaper helper you will need
-# these http://github.com/rails/irs_process_scripts
+# Make capistrano create shared/sockets and symlink it to tmp/sockets
+set :shared_children, shared_children + %w(tmp/sockets)
 
-# If you are using Passenger mod_rails uncomment this:
-# namespace :deploy do
-#   task :start do ; end
-#   task :stop do ; end
-#   task :restart, :roles => :app, :except => { :no_release => true } do
-#     run "#{try_sudo} touch #{File.join(current_path,'tmp','restart.txt')}"
-#   end
-# end
+role :app, 'echidna.transi.st'
+role :web, 'echidna.transi.st'
+role :db,  'echidna.transi.st', primary: true
+set :port, 2220
+set :branch, 'develop'
+set :rails_env, 'production'
+set :deploy_to, '/home/echidna/echidna-qq.transi.st'
+
+after 'deploy:update_code', 'deploy:symbolic_links'
+after 'deploy:restart', 'deploy:cleanup'
+
+namespace :deploy do
+  desc 'Symbolic links'
+  task :symbolic_links do
+    run "ln -nfs #{shared_path}/config/application.yml #{release_path}/config/application.yml"
+    run "ln -nfs #{shared_path}/cache #{release_path}/cache"
+  end
+
+  desc 'Restart unicorn'
+  task :restart do
+    run <<-BASH
+      kill -USR2 `cat #{shared_path}/pids/unicorn.pid`
+    BASH
+  end
+
+  desc 'Start unicorn'
+  task :start, roles: :app do
+    run <<-BASH
+      cd #{current_release} &&
+      bin/unicorn_rails -c config/unicorn.rb -D -E #{rails_env}
+    BASH
+  end
+
+  desc 'Stop unicorn'
+  task :stop, roles: :app do
+    run <<-BASH
+      kill -QUIT `cat #{shared_path}/pids/unicorn.pid`
+    BASH
+  end
+end

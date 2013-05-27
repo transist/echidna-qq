@@ -29,4 +29,11 @@ group :development do
   gem 'quiet_assets', '>= 1.0.1'
   gem 'better_errors', '>= 0.3.2'
   gem "binding_of_caller", ">= 0.7.1", :group => :development, :platforms => [:mri_19, :rbx]
+  gem 'capistrano', require: nil
+  gem 'capistrano_colors', require: nil
+  gem 'rvm-capistrano', require: nil
+end
+
+group :production do
+  gem 'unicorn', '>= 4.3.1'
 end
