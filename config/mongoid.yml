@@ -82,6 +82,6 @@ test:
 production:
   sessions:
     default:
-      database: echidna_production
+      database: echidna_qq_production
       hosts:
         - localhost:27017
